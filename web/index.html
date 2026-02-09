@@ -1,22 +1,270 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>محرر أكواد جافا</title>
+  <title>نظام إدارة المقررات والتقييم</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>محرر أكواد جافا</h1>
-    <textarea id="javaCode" placeholder="أدخل كود الجافا هنا..."></textarea>
-    <button onclick="runCode()">تشغيل الكود</button>
-    <div id="output">
-      <h2>النتيجة:</h2>
-      <pre id="result"></pre>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>لوحة المدرب</h1>
+        <p>إدارة المقررات والمتدربين</p>
+      </div>
+      <nav class="menu">
+        <button class="menu-item active" data-section="dashboard">لوحة التحكم</button>
+        <button class="menu-item" data-section="courses">المقررات والشعب</button>
+        <button class="menu-item" data-section="trainees">المتدربون</button>
+        <button class="menu-item" data-section="grades">الدرجات</button>
+        <button class="menu-item" data-section="appointments">مواعيد المراجعة</button>
+        <button class="menu-item" data-section="export">تصدير الدرجات</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span>تخزين محلي آمن</span>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <h2 id="sectionTitle">لوحة التحكم</h2>
+          <p class="subtitle">نظام أكاديمي سريع وسهل الاستخدام للمدرب الفني</p>
+        </div>
+        <div class="topbar-meta">
+          <span id="todayDate"></span>
+        </div>
+      </header>
+
+      <section id="dashboard" class="section active">
+        <div class="cards">
+          <div class="card">
+            <h3>إجمالي المقررات</h3>
+            <p id="totalCourses">0</p>
+          </div>
+          <div class="card">
+            <h3>إجمالي المتدربين</h3>
+            <p id="totalTrainees">0</p>
+          </div>
+          <div class="card">
+            <h3>مواعيد اليوم</h3>
+            <p id="todayAppointments">0</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3>تنبيهات مواعيد اليوم</h3>
+          </div>
+          <div id="todayReminderList" class="list"></div>
+        </div>
+        <div class="quick-actions">
+          <button data-section="courses">إدارة المقررات</button>
+          <button data-section="trainees">إدارة المتدربين</button>
+          <button data-section="grades">إدخال الدرجات</button>
+          <button data-section="appointments">المواعيد</button>
+          <button data-section="export">تصدير</button>
+        </div>
+      </section>
+
+      <section id="courses" class="section">
+        <div class="grid two">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>إضافة مقرر/شعبة</h3>
+            </div>
+            <form id="courseForm" class="form">
+              <label>اسم المقرر
+                <input type="text" id="courseName" required>
+              </label>
+              <label>رقم الشعبة
+                <input type="text" id="courseSection" required>
+              </label>
+              <div class="day-scheduler">
+                <div class="day-header">
+                  <h4>أيام ومحاضرات المقرر</h4>
+                  <button type="button" id="addDay">إضافة يوم</button>
+                </div>
+                <div id="daysContainer"></div>
+              </div>
+              <label>ملاحظات (اختياري)
+                <textarea id="courseNotes" rows="3"></textarea>
+              </label>
+              <button type="submit" class="primary">حفظ المقرر</button>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>قائمة المقررات</h3>
+              <input type="text" id="courseSearch" placeholder="ابحث عن مقرر">
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table" id="coursesTable">
+                <thead>
+                  <tr>
+                    <th data-sort="name">المقرر</th>
+                    <th data-sort="section">الشعبة</th>
+                    <th>الأيام</th>
+                    <th data-sort="trainees">المتدربون</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="courseDetail">
+          <div class="panel-header">
+            <h3>تفاصيل المقرر</h3>
+            <span id="courseDetailTitle">اختر مقرراً من القائمة</span>
+          </div>
+          <div class="detail-grid">
+            <div>
+              <h4>بيانات المقرر</h4>
+              <div id="courseInfo" class="info-box"></div>
+            </div>
+            <div>
+              <h4>إدارة المتدربين</h4>
+              <div class="paste-box">
+                <p>الصق بيانات المتدربين من Excel (رقم التدريب، الاسم الكامل، الجوال اختياري)</p>
+                <textarea id="traineePaste" rows="4" placeholder="1001\tأحمد محمد\t0500000000"></textarea>
+                <button id="pasteTrainees" type="button">إضافة المتدربين</button>
+              </div>
+              <form id="traineeForm" class="form inline">
+                <input type="text" id="traineeId" placeholder="رقم التدريب" required>
+                <input type="text" id="traineeName" placeholder="الاسم الكامل" required>
+                <input type="text" id="traineePhone" placeholder="رقم الجوال">
+                <button type="submit">إضافة فردية</button>
+              </form>
+              <div class="table-wrapper">
+                <table class="data-table" id="traineesTable">
+                  <thead>
+                    <tr>
+                      <th>رقم التدريب</th>
+                      <th>الاسم</th>
+                      <th>الجوال</th>
+                      <th>إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="trainees" class="section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>البحث الذكي عن المتدرب</h3>
+          </div>
+          <form id="traineeSearchForm" class="form inline">
+            <input type="text" id="traineeSearchInput" placeholder="أدخل رقم التدريب" required>
+            <button type="submit">بحث</button>
+          </form>
+          <div id="traineeSearchResults" class="list"></div>
+        </div>
+      </section>
+
+      <section id="grades" class="section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>نظام التقييم والدرجات</h3>
+          </div>
+          <div class="form inline">
+            <label>اختر المقرر
+              <select id="gradeCourseSelect"></select>
+            </label>
+          </div>
+          <div class="grade-config">
+            <form id="assessmentForm" class="form inline">
+              <input type="text" id="assessmentName" placeholder="اسم التقييم" required>
+              <input type="number" id="assessmentMax" placeholder="الدرجة العظمى" min="0" required>
+              <button type="submit">إضافة تقييم</button>
+            </form>
+            <div id="assessmentList" class="chips"></div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="gradesTable">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="appointments" class="section">
+        <div class="grid two">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>طلب موعد مراجعة</h3>
+            </div>
+            <form id="appointmentForm" class="form">
+              <label>المقرر
+                <select id="appointmentCourse"></select>
+              </label>
+              <label>المتدرب
+                <select id="appointmentTrainee"></select>
+              </label>
+              <label>التاريخ
+                <input type="date" id="appointmentDate" required>
+              </label>
+              <label>اليوم
+                <input type="text" id="appointmentDay" placeholder="مثال: الأحد" required>
+              </label>
+              <label>الوقت
+                <input type="time" id="appointmentTime" required>
+              </label>
+              <label>سبب الموعد (اختياري)
+                <textarea id="appointmentReason" rows="3"></textarea>
+              </label>
+              <button type="submit" class="primary">تأكيد الموعد</button>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>مواعيد اليوم</h3>
+            </div>
+            <div id="dailyAppointments" class="list"></div>
+            <div class="panel-header">
+              <h3>المواعيد المغلقة</h3>
+            </div>
+            <div id="closedAppointments" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="export" class="section">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>تصدير الدرجات إلى Excel</h3>
+          </div>
+          <div class="form inline">
+            <label>اختر المقرر
+              <select id="exportCourseSelect"></select>
+            </label>
+            <button id="exportButton">تصدير .xlsx</button>
+          </div>
+          <p class="hint">سيتم إنشاء ملف Excel منظم بالأعمدة الرسمية المطلوبة.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle"></h3>
+        <button id="closeModal">إغلاق</button>
+      </div>
+      <div id="modalBody"></div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
